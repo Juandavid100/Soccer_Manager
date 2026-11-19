@@ -1,4 +1,4 @@
-# Escuela de Fútbol
+# Soccer Manager
 
 Sistema para administrar una escuela de fútbol: estudiantes, acudientes, entrenadores, grupos, categorías, entrenamientos, campeonatos, mensualidades y notificaciones.
 
@@ -22,3 +22,8 @@ Las 20 historias de usuario están en [Issues](../../issues), con criterios de a
 ## Prototipos
 
 Hay una pantalla por historia de usuario en la carpeta [`prototipos/`](prototipos/). Se pueden ver en línea en https://juandavid100.github.io/Escuela-de-futbol/prototipos/
+
+
+## Diagramas
+
+Las 5 vistas de la arquitectura están en [`diagramas/`](diagramas/): contexto, funcional, lógica, desarrollo y despliegue. El modelo editable es `SoccerManager.vpp` (Visual Paradigm).
