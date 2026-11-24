@@ -28,6 +28,17 @@ Hay una pantalla por historia de usuario en la carpeta [`prototipos/`](prototipo
 
 Las 5 vistas de la arquitectura están en [`diagramas/`](diagramas/): contexto, funcional, lógica, desarrollo y despliegue. El modelo editable es `SoccerManager.vpp` (Visual Paradigm).
 
+## Interfaz web
+
+La plataforma incluye una interfaz web hecha con HTML, CSS y JavaScript sin dependencias externas. Está en `soccer-manager/src/main/resources/static/` y la sirve el mismo Spring Boot, así que funciona en la misma dirección que la API (local: http://localhost:8080).
+
+- **Gerente:** panel con indicadores, estudiantes, acudientes, entrenadores, categorías, grupos, entrenamientos con asistencia, campeonatos con partidos y convocatorias, evaluaciones, mensualidades con pagos, notificaciones y usuarios.
+- **Entrenador:** sus grupos, próximas sesiones, asistencia, convocatorias y evaluaciones.
+- **Acudiente:** sus estudiantes, actividades, progreso publicado, respuesta a convocatorias y pago de mensualidades.
+- **Estudiante:** su perfil, actividades, asistencia y evaluaciones.
+
+La primera vez que se abre sin usuarios, pide crear la cuenta del gerente. Desde el panel se pueden cargar datos de ejemplo, que crean también cuentas de prueba para cada rol (contraseña `demo12345`).
+
 ## Despliegue
 
 La API está desplegada en Render con base de datos en MongoDB Atlas:
