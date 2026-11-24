@@ -27,3 +27,10 @@ Hay una pantalla por historia de usuario en la carpeta [`prototipos/`](prototipo
 ## Diagramas
 
 Las 5 vistas de la arquitectura están en [`diagramas/`](diagramas/): contexto, funcional, lógica, desarrollo y despliegue. El modelo editable es `SoccerManager.vpp` (Visual Paradigm).
+
+## Despliegue
+
+La API está desplegada en Render con base de datos en MongoDB Atlas:
+https://soccer-manager-gfqo.onrender.com/api/categorias
+
+El plan gratuito se suspende cuando no se usa, así que la primera petición puede tardar cerca de un minuto.
