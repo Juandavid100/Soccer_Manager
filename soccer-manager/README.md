@@ -22,8 +22,8 @@ La API queda en `http://localhost:8080/api`. Para generar el ejecutable: `mvn pa
 
 ## Probarla con Postman
 
-1. En Postman, haga clic en **Import** y elija el archivo [`postman/SoccerManager.postman_collection.json`](postman/SoccerManager.postman_collection.json).
-2. Con la API encendida, abra la colección y haga clic en **Run**. Las 52 peticiones se ejecutan en orden.
+1. En Postman, haga clic en **Import** y elija los tres archivos de [`postman/`](postman/): la colección `SoccerManager.postman_collection.json` y los entornos `SoccerManager-Local` y `SoccerManager-Render`.
+2. Elija el entorno (Local o Render) arriba a la derecha, abra la colección y haga clic en **Run**. Las 52 peticiones se ejecutan en orden.
 3. Cada petición guarda los `id` que necesitan las siguientes y verifica el código HTTP esperado. También incluye los casos de error: 400, 401, 403, 404 y 409.
 
 Puede ejecutar la colección todas las veces que quiera, porque genera documentos y correos nuevos en cada corrida.
@@ -105,4 +105,4 @@ Todos los errores responden con el cuerpo `{"error": "mensaje"}`.
 
 ## Pruebas
 
-`mvn test` corre las pruebas unitarias con JUnit 5 y Mockito: `EstudianteControllerTest` y `EstudianteServiceTest`. No necesitan MongoDB.
+`mvn test` corre las pruebas unitarias con JUnit 5 y Mockito: `EstudianteControllerTest` y `EstudianteServiceTest`, 7 pruebas en total. No necesitan MongoDB.
