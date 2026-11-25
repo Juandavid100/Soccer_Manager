@@ -1,0 +1,362 @@
+{
+  "info": {
+    "_postman_id": "e2bf858a-25d4-4686-bb2d-bf03980189d5",
+    "name": "Soccer Manager - Demo en vivo",
+    "description": "Peticiones listas para la exposición: crear, consultar, modificar y borrar, y ver los cambios en MongoDB Atlas y en la web. Elija el entorno Local o Render antes de enviar.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Crear acudiente",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/acudientes",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "acudientes"
+          ]
+        },
+        "description": "Crea el acudiente y guarda su id para las siguientes peticiones. Después se ve en Atlas (colección acudientes) y en la web (Acudientes).",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"documento\": \"{{$randomInt}}{{$randomInt}}{{$randomInt}}\",\n  \"nombres\": \"Pedro\",\n  \"apellidos\": \"Moreno\",\n  \"parentesco\": \"Padre\",\n  \"telefono\": \"3001234567\",\n  \"correo\": \"pedro.moreno@correo.com\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Responde 201 (creado)', () => pm.response.to.have.status(201));",
+              "const a = pm.response.json();",
+              "pm.collectionVariables.set('acudienteDemo', a.id);",
+              "pm.collectionVariables.set('documentoDemo', a.documento);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Ver el acudiente creado",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/acudientes/{{acudienteDemo}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "acudientes",
+            "{{acudienteDemo}}"
+          ]
+        },
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Responde 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Cambiar el teléfono del acudiente",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/acudientes/{{acudienteDemo}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "acudientes",
+            "{{acudienteDemo}}"
+          ]
+        },
+        "description": "",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"documento\": \"{{documentoDemo}}\",\n  \"nombres\": \"Pedro\",\n  \"apellidos\": \"Moreno\",\n  \"parentesco\": \"Padre\",\n  \"telefono\": \"3159998877\",\n  \"correo\": \"pedro.moreno@correo.com\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+              "pm.test('El teléfono cambió', () => pm.expect(pm.response.json().telefono).to.eql('3159998877'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Matricular un estudiante con ese acudiente",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/estudiantes",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "estudiantes"
+          ]
+        },
+        "description": "La relación se guarda en el estudiante, en acudienteIds.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"documento\": \"{{$randomInt}}{{$randomInt}}{{$randomInt}}\",\n  \"nombres\": \"Daniel\",\n  \"apellidos\": \"Moreno\",\n  \"fechaNacimiento\": \"2016-05-10\",\n  \"acudienteIds\": [\n    \"{{acudienteDemo}}\"\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Responde 201 (matriculado)', () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set('estudianteDemo', pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Ver los estudiantes a cargo del acudiente",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/acudientes/{{acudienteDemo}}/estudiantes",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "acudientes",
+            "{{acudienteDemo}}",
+            "estudiantes"
+          ]
+        },
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Responde 200', () => pm.response.to.have.status(200));",
+              "pm.test('Tiene a Daniel a cargo', () => pm.expect(pm.response.json().length).to.be.above(0));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Intentar borrar el acudiente (no se deja: 409)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/acudientes/{{acudienteDemo}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "acudientes",
+            "{{acudienteDemo}}"
+          ]
+        },
+        "description": "Regla de negocio en AcudienteService.eliminar (líneas 73-75)."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Responde 409 porque tiene estudiantes a cargo', () => pm.response.to.have.status(409));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Crear un acudiente sin estudiantes",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/acudientes",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "acudientes"
+          ]
+        },
+        "description": "",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"documento\": \"{{$randomInt}}{{$randomInt}}{{$randomInt}}\",\n  \"nombres\": \"Laura\",\n  \"apellidos\": \"Burbano\",\n  \"parentesco\": \"Tía\",\n  \"telefono\": \"3017778899\",\n  \"correo\": \"laura.burbano@correo.com\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Responde 201', () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set('acudienteParaBorrar', pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Borrar el acudiente sin estudiantes (204)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/acudientes/{{acudienteParaBorrar}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "acudientes",
+            "{{acudienteParaBorrar}}"
+          ]
+        },
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Responde 204 (borrado)', () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Listar acudientes",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/acudientes",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "acudientes"
+          ]
+        },
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Responde 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://soccer-manager-gfqo.onrender.com"
+    },
+    {
+      "key": "acudienteDemo",
+      "value": ""
+    },
+    {
+      "key": "documentoDemo",
+      "value": ""
+    },
+    {
+      "key": "estudianteDemo",
+      "value": ""
+    },
+    {
+      "key": "acudienteParaBorrar",
+      "value": ""
+    }
+  ]
+}
