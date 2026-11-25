@@ -25,7 +25,7 @@ export async function mostrar(contenedor) {
       vacio: 'No hay categorías. Cree la primera para poder organizar los grupos.',
       columnas: [
         { titulo: 'Categoría', valor: (c) => h('b', {}, c.nombre) },
-        { titulo: 'Edades', valor: (c) => `${c.edadMinima} a ${c.edadMaxima} años` },
+        { titulo: 'Edades', valor: (c) => (c.edadMinima === c.edadMaxima ? `${c.edadMinima} años` : `${c.edadMinima} a ${c.edadMaxima} años`) },
         { titulo: 'Temporada', valor: (c) => c.temporada },
         { titulo: 'Fecha de corte', valor: (c) => formato.fecha(c.fechaCorte) },
         { titulo: 'Grupos', valor: (c) => grupos.filter((g) => g.categoriaId === c.id).length },

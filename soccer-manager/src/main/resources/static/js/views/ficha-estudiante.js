@@ -31,7 +31,7 @@ export async function fichaEstudiante(id, { modo = 'gerencia', alCambiar } = {})
         ['Fecha de nacimiento', formato.fecha(est.fechaNacimiento)],
         ['Teléfono', est.telefono],
         ['Correo', est.correo],
-        ['Categoría', categoria ? `${categoria.nombre} (${categoria.edadMinima}–${categoria.edadMaxima} años)` : '—'],
+        ['Categoría', categoria ? `${categoria.nombre} (${categoria.edadMinima === categoria.edadMaxima ? categoria.edadMinima : `${categoria.edadMinima}–${categoria.edadMaxima}`} años)` : '—'],
         ['Grupo', grupo ? `${grupo.codigo} · ${grupo.horario || ''}` : '—'],
         grupo?.ubicacion ? ['Lugar de entrenamiento', h('span', {}, grupo.ubicacion.nombre, grupo.ubicacion.enlaceMapa ? [' · ', h('a', { href: grupo.ubicacion.enlaceMapa, target: '_blank', rel: 'noopener' }, 'Ver mapa')] : null)] : null,
       ]),

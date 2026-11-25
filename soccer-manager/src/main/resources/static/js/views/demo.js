@@ -38,9 +38,25 @@ async function cargar(paso) {
   const anio = new Date().getFullYear();
   const sufijo = String(Date.now()).slice(-5);
   const dia = (n, hora = 0, min = 0) => { const d = new Date(); d.setDate(d.getDate() + n); d.setHours(hora, min, 0, 0); return d; };
-  const ubicacion = (nombre, direccion) => ({ nombre, direccion, indicaciones: 'Ingreso por la portería principal', enlaceMapa: `https://maps.google.com/?q=${encodeURIComponent(direccion + ', Pasto')}` });
+  // Próxima (o anterior) fecha de un día de la semana: 0 = domingo … 6 = sábado
+  const proximoDia = (diaSemana, hora, min = 0, semanas = 0) => {
+    const d = new Date(); d.setHours(hora, min, 0, 0);
+    let suma = (diaSemana - d.getDay() + 7) % 7;
+    if (suma === 0 && d <= new Date()) suma = 7;
+    d.setDate(d.getDate() + suma + semanas * 7);
+    return d;
+  };
+  const anteriorDia = (diaSemana, hora, min = 0) => {
+    const d = new Date(); d.setHours(hora, min, 0, 0);
+    let resta = (d.getDay() - diaSemana + 7) % 7;
+    if (resta === 0 && d >= new Date()) resta = 7;
+    d.setDate(d.getDate() - resta);
+    return d;
+  };
+  const sumarMinutos = (d, m) => new Date(d.getTime() + m * 60000);
+  const ubicacion = (nombre, direccion, indicaciones) => ({ nombre, direccion, indicaciones, enlaceMapa: `https://maps.google.com/?q=${encodeURIComponent(direccion)}` });
 
-  // Categorías (se reutilizan si ya existen)
+  // Categorías por año de nacimiento, como las maneja el club (temporada actual, corte 31 de diciembre)
   const existentes = await api.get(R.categorias);
   const categoria = async (nombre, min, max) => {
     const ya = existentes.find((c) => c.nombre === nombre && c.temporada === anio);
@@ -48,9 +64,14 @@ async function cargar(paso) {
     paso(`Categoría ${nombre}`);
     return api.post(R.categorias, { nombre, edadMinima: min, edadMaxima: max, temporada: anio, fechaCorte: `${anio}-12-31` });
   };
-  const sub8 = await categoria('Sub-8', 6, 8);
-  const sub10 = await categoria('Sub-10', 9, 10);
-  const sub12 = await categoria('Sub-12', 11, 12);
+  const rango = (desde, hasta) => (desde === hasta ? `${desde}` : `${desde}-${hasta}`);
+  const cat = async (desde, hasta) => categoria(rango(desde, hasta), anio - hasta, anio - desde);
+  const c1921 = await cat(anio - 7, anio - 5);
+  const c18 = await cat(anio - 8, anio - 8);
+  const c1617 = await cat(anio - 10, anio - 9);
+  const c1415 = await cat(anio - 12, anio - 11);
+  const c1213 = await cat(anio - 14, anio - 13);
+  await cat(anio - 17, anio - 15);
 
   // Entrenadores con permisos
   const entrenador = async (nombres, apellidos, n) => {
@@ -72,20 +93,22 @@ async function cargar(paso) {
   const sandra = await acudiente('Sandra', 'López', 'Madre', 3);
   const diego = await acudiente('Diego', 'Rosero', 'Padre', 4);
 
-  // Grupos
+  // Grupos: todos entrenan en la cancha del Colegio INEM de Pasto.
+  // Lunes 2:30 p. m. y viernes 4:00 p. m. son los horarios que publica el club; los demás son de ejemplo.
   const codigos = new Set((await api.get(R.grupos)).map((g) => g.codigo));
-  const grupo = async (codigo, cat, cupo, horario, lugar, entrenadores) => {
+  const inem = ubicacion('Cancha del Colegio INEM', 'Colegio INEM, Pasto, Nariño', 'Ingreso por la portería del colegio');
+  const grupo = async (codigo, categoriaG, cupo, horario, entrenadores, sesiones) => {
     const final = codigos.has(codigo) ? `${codigo}-${sufijo}` : codigo;
     paso(`Grupo ${final}`);
-    const g = await api.post(R.grupos, { codigo: final, categoriaId: cat.id, cupoMaximo: cupo, horario, ubicacion: lugar });
+    const g = await api.post(R.grupos, { codigo: final, categoriaId: categoriaG.id, cupoMaximo: cupo, horario, ubicacion: inem });
     for (const e of entrenadores) await api.patch(`${R.grupos}/${g.id}/entrenadores/${e.id}`);
-    return g;
+    return { ...g, sesiones, entrenador: entrenadores[0] };
   };
-  const cancha1 = ubicacion('Cancha sintética Champagnat', 'Cra 27 # 10-20');
-  const cancha2 = ubicacion('Estadio Libertad · cancha auxiliar', 'Av. Panamericana # 18-50');
-  const g8 = await grupo('S8-A', sub8, 12, 'Martes y jueves 3:00 p. m.', cancha1, [laura]);
-  const g10 = await grupo('S10-A', sub10, 15, 'Lunes, miércoles y viernes 4:00 p. m.', cancha1, [carlos]);
-  const g12 = await grupo('S12-A', sub12, 15, 'Martes y jueves 5:00 p. m.', cancha2, [carlos, laura]);
+  const g1921 = await grupo('2019-2021 A', c1921, 16, 'Sábados 9:00 a. m.', [laura], [[6, 9, 0]]);
+  const g18 = await grupo('2018 A', c18, 16, 'Martes y jueves 3:00 p. m.', [laura], [[2, 15, 0], [4, 15, 0]]);
+  const g1617 = await grupo('2016-2017 A', c1617, 18, 'Lunes 2:30 p. m. y viernes 4:00 p. m.', [carlos], [[1, 14, 30], [5, 16, 0]]);
+  const g1415 = await grupo('2014-2015 A', c1415, 18, 'Lunes 4:00 p. m. y miércoles 4:00 p. m.', [carlos, laura], [[1, 16, 0], [3, 16, 0]]);
+  const g1213 = await grupo('2012-2013 A', c1213, 20, 'Miércoles 5:30 p. m. y viernes 5:30 p. m.', [carlos], [[3, 17, 30], [5, 17, 30]]);
 
   // Estudiantes (la edad debe coincidir con la categoría a la fecha de corte)
   const estudiante = async (nombres, apellidos, edad, acudientes, g, n) => {
@@ -95,51 +118,77 @@ async function cargar(paso) {
     return e;
   };
   const est = [
-    await estudiante('Tomás', 'Pérez', 7, [ana], g8, 1),
-    await estudiante('Valentina', 'Gómez', 8, [jorge], g8, 2),
-    await estudiante('Juan', 'Pérez', 9, [ana], g10, 3),
-    await estudiante('Samuel', 'López', 10, [sandra], g10, 4),
-    await estudiante('Mariana', 'Rosero', 9, [diego], g10, 5),
-    await estudiante('Isabella', 'Gómez', 10, [jorge], g10, 6),
-    await estudiante('Mateo', 'López', 11, [sandra], g12, 7),
-    await estudiante('Sofía', 'Rosero', 12, [diego], g12, 8),
-    await estudiante('Martín', 'Pérez', 11, [ana], g12, 9),
-    await estudiante('Emilio', 'Gómez', 9, [jorge], null, 10),
+    await estudiante('Tomás', 'Pérez', 8, [ana], g18, 1),
+    await estudiante('Valentina', 'Gómez', 8, [jorge], g18, 2),
+    await estudiante('Juan', 'Pérez', 10, [ana], g1617, 3),
+    await estudiante('Samuel', 'López', 9, [sandra], g1617, 4),
+    await estudiante('Mariana', 'Rosero', 10, [diego], g1617, 5),
+    await estudiante('Isabella', 'Gómez', 12, [jorge], g1415, 6),
+    await estudiante('Mateo', 'López', 11, [sandra], g1415, 7),
+    await estudiante('Sofía', 'Rosero', 14, [diego], g1213, 8),
+    await estudiante('Martín', 'Pérez', 12, [ana], g1415, 9),
+    await estudiante('Lucas', 'Rosero', 6, [diego], g1921, 10),
+    await estudiante('Emilio', 'Gómez', 13, [jorge], null, 11),
   ];
-  const sub10Est = est.filter((e) => e.grupoId === g10.id);
+  const deGrupo = (g) => est.filter((e) => e.grupoId === g.id);
 
-  // Entrenamientos: uno de ayer (con asistencia) y dos próximos por grupo
+  // Entrenamientos: la sesión anterior (con asistencia) y las dos próximas semanas de cada grupo
   const estados = ['PRESENTE', 'PRESENTE', 'TARDE', 'PRESENTE', 'AUSENTE'];
-  for (const [g, hora] of [[g8, 15], [g10, 16], [g12, 17]]) {
+  const temas = ['Conducción y pase corto', 'Control orientado y visión de juego', 'Definición y remate a portería', 'Juego reducido 4 contra 4'];
+  for (const g of [g1921, g18, g1617, g1415, g1213]) {
     paso(`Entrenamientos del grupo ${g.codigo}`);
-    const ayer = await api.post(R.entrenamientos, { grupoId: g.id, fechaInicio: fechaHoraLocal(dia(-1, hora)), fechaFin: fechaHoraLocal(dia(-1, hora + 1, 30)), instrucciones: 'Trabajo de conducción y pase corto' });
-    await api.post(R.entrenamientos, { grupoId: g.id, fechaInicio: fechaHoraLocal(dia(2, hora)), fechaFin: fechaHoraLocal(dia(2, hora + 1, 30)), instrucciones: 'Traer canilleras e hidratación' });
-    await api.post(R.entrenamientos, { grupoId: g.id, fechaInicio: fechaHoraLocal(dia(5, hora)), fechaFin: fechaHoraLocal(dia(5, hora + 1, 30)), instrucciones: 'Definición y remate a portería' });
-    const delGrupo = est.filter((e) => e.grupoId === g.id);
-    for (const [i, e] of delGrupo.entries())
-      await api.post(R.asistencias, { actividadId: ayer.id, estudianteId: e.id, estado: estados[i % estados.length], registradoPor: (g === g8 ? laura : carlos).id });
+    const [dS, hS, mS] = g.sesiones[0];
+    const inicioAnterior = anteriorDia(dS, hS, mS);
+    const anterior = await api.post(R.entrenamientos, { grupoId: g.id, fechaInicio: fechaHoraLocal(inicioAnterior), fechaFin: fechaHoraLocal(sumarMinutos(inicioAnterior, 90)), instrucciones: temas[0] });
+    let t = 1;
+    for (let semana = 0; semana < 2; semana++) {
+      for (const [d, hh, mm] of g.sesiones) {
+        const inicio = proximoDia(d, hh, mm, semana);
+        await api.post(R.entrenamientos, { grupoId: g.id, fechaInicio: fechaHoraLocal(inicio), fechaFin: fechaHoraLocal(sumarMinutos(inicio, 90)), instrucciones: `${temas[t++ % temas.length]}. Traer canilleras e hidratación` });
+      }
+    }
+    for (const [i, e] of deGrupo(g).entries())
+      await api.post(R.asistencias, { actividadId: anterior.id, estudianteId: e.id, estado: estados[i % estados.length], registradoPor: g.entrenador.id });
   }
 
-  // Campeonato con partidos y convocatorias
-  paso('Campeonato Copa Pasto con partidos');
-  const copa = await api.post(R.campeonatos, { nombre: `Copa Pasto ${anio}`, categoriaId: sub10.id, fechaInicio: fechaLocal(dia(-10)), fechaFin: fechaLocal(dia(40)), entrenadorId: carlos.id });
-  await api.put(`${R.campeonatos}/${copa.id}`, { ...copa, estado: 'EN_CURSO' });
-  const jugado = await api.post(R.partidos, { campeonatoId: copa.id, rival: 'Deportivo Sur', fechaInicio: fechaHoraLocal(dia(-1, 9)), fechaFin: fechaHoraLocal(dia(-1, 10, 30)), ubicacion: cancha2 });
+  // Campeonatos del club en la temporada
+  paso('Torneo de Iniciación Club All Boys (en curso)');
+  const iniciacion = await api.post(R.campeonatos, { nombre: `Torneo de Iniciación Club All Boys Pasto ${anio}`, categoriaId: c1617.id, fechaInicio: fechaLocal(dia(-23)), fechaFin: fechaLocal(dia(30)), entrenadorId: carlos.id });
+  await api.put(`${R.campeonatos}/${iniciacion.id}`, { ...iniciacion, estado: 'EN_CURSO' });
+  const jugado = await api.post(R.partidos, { campeonatoId: iniciacion.id, rival: 'Fútbol Real', fechaInicio: fechaHoraLocal(dia(-2, 9)), fechaFin: fechaHoraLocal(dia(-2, 10, 30)), ubicacion: inem });
   await api.patch(`${R.partidos}/${jugado.id}/resultado`, { resultado: '3-1' });
-  const proximo = await api.post(R.partidos, { campeonatoId: copa.id, rival: 'Academia Galeras', fechaInicio: fechaHoraLocal(dia(6, 9)), fechaFin: fechaHoraLocal(dia(6, 10, 30)), ubicacion: cancha2 });
+  const proximo = await api.post(R.partidos, { campeonatoId: iniciacion.id, rival: 'Academia Sport Center', fechaInicio: fechaHoraLocal(proximoDia(6, 10)), fechaFin: fechaHoraLocal(proximoDia(6, 11, 30)), ubicacion: inem });
   paso('Convocatorias al próximo partido');
+  const convocados = deGrupo(g1617);
   const convocatorias = [];
-  for (const e of sub10Est) convocatorias.push(await api.post(R.convocatorias, { partidoId: proximo.id, estudianteId: e.id, convocadoPor: carlos.id }));
+  for (const e of convocados) convocatorias.push(await api.post(R.convocatorias, { partidoId: proximo.id, estudianteId: e.id, convocadoPor: carlos.id }));
   if (convocatorias[0]) await api.patch(`${R.convocatorias}/${convocatorias[0].id}/respuesta`, { estado: 'CONFIRMADO' });
   if (convocatorias[1]) await api.patch(`${R.convocatorias}/${convocatorias[1].id}/respuesta`, { estado: 'NO_ASISTIRA', motivo: 'Viaje familiar ese fin de semana' });
+
+  paso('Baby Soccer Cup El Pedregal (campeones)');
+  const pedregal = ubicacion('Cancha de El Pedregal', 'El Pedregal, Nariño', 'Escenario del torneo');
+  const baby = await api.post(R.campeonatos, { nombre: `Baby Soccer Cup ${anio} · El Pedregal`, categoriaId: c1415.id, fechaInicio: fechaLocal(dia(-30)), fechaFin: fechaLocal(dia(-22)), entrenadorId: carlos.id });
+  await api.put(`${R.campeonatos}/${baby.id}`, { ...baby, estado: 'EN_CURSO' });
+  const semifinal = await api.post(R.partidos, { campeonatoId: baby.id, rival: 'Escuela Los Andes', fechaInicio: fechaHoraLocal(dia(-23, 10)), fechaFin: fechaHoraLocal(dia(-23, 11, 30)), ubicacion: pedregal });
+  await api.patch(`${R.partidos}/${semifinal.id}/resultado`, { resultado: '2-0' });
+  const final = await api.post(R.partidos, { campeonatoId: baby.id, rival: 'Club Deportivo Ipiales', fechaInicio: fechaHoraLocal(dia(-22, 15)), fechaFin: fechaHoraLocal(dia(-22, 16, 30)), ubicacion: pedregal });
+  await api.patch(`${R.partidos}/${final.id}/resultado`, { resultado: '3-2' });
+  await api.put(`${R.campeonatos}/${baby.id}`, { ...baby, estado: 'FINALIZADO' });
+
+  paso('Torneo Rebelión (subcampeones)');
+  const rebelion = await api.post(R.campeonatos, { nombre: `Torneo Rebelión ${anio}`, categoriaId: c18.id, fechaInicio: fechaLocal(dia(-40)), fechaFin: fechaLocal(dia(-15)), entrenadorId: laura.id });
+  await api.put(`${R.campeonatos}/${rebelion.id}`, { ...rebelion, estado: 'EN_CURSO' });
+  const finalRebelion = await api.post(R.partidos, { campeonatoId: rebelion.id, rival: 'Fútbol Real', fechaInicio: fechaHoraLocal(dia(-15, 9)), fechaFin: fechaHoraLocal(dia(-15, 10, 30)), ubicacion: inem });
+  await api.patch(`${R.partidos}/${finalRebelion.id}/resultado`, { resultado: '1-2' });
+  await api.put(`${R.campeonatos}/${rebelion.id}`, { ...rebelion, estado: 'FINALIZADO' });
 
   // Evaluaciones
   paso('Evaluaciones del periodo');
   const notas = [[4, 3, 5, 4], [5, 4, 4, 5], [3, 3, 4, 4], [4, 4, 3, 5]];
-  for (const [i, e] of sub10Est.entries()) {
+  for (const [i, e] of [...deGrupo(g1617), ...deGrupo(g1415)].entries()) {
     const [tecnico, tactico, fisico, actitudinal] = notas[i % notas.length];
     const ev = await api.post(R.evaluaciones, { estudianteId: e.id, entrenadorId: carlos.id, periodo: `${anio}-2`, tecnico, tactico, fisico, actitudinal, observaciones: 'Buen control de balón y compromiso en los entrenamientos', meta: 'Mejorar el pase largo y la lectura de juego' });
-    if (i < 3) await api.patch(`${R.evaluaciones}/${ev.id}/publicacion`);
+    if (i < 4) await api.patch(`${R.evaluaciones}/${ev.id}/publicacion`);
   }
 
   // Mensualidades: mes anterior (una vencida) y mes actual (con abonos)
