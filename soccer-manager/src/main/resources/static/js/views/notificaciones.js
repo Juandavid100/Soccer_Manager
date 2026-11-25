@@ -1,5 +1,5 @@
 // Notificaciones a estudiantes, acudientes y entrenadores (HU-14).
-import { h, limpiar, encabezado, boton, tarjeta, estado, formato, formularioModal, ejecutar, confirmar, aviso, opciones, enumOpciones, selector, icono } from '../ui.js';
+import { h, textoLegible, limpiar, encabezado, boton, tarjeta, estado, formato, formularioModal, ejecutar, confirmar, aviso, opciones, enumOpciones, selector, icono } from '../ui.js';
 import { api, R } from '../api.js';
 import { catalogos, nombrePersona, esGerente } from '../sesion.js';
 
@@ -14,7 +14,7 @@ function listaNotificaciones(lista, { anular } = {}) {
         h('div', { class: 'kpi', style: { padding: 0 } }, h('div', { class: 'ico verde', style: { width: '38px', height: '38px' } }, icono(ICONOS[n.tipo] || 'campana'))),
         h('div', {},
           h('div', { style: { display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' } }, h('b', {}, formato.enum(n.tipo)), h('span', { class: 'mutado pequeno' }, formato.fechaHora(n.fechaEnvio)), n.anulada ? h('span', { class: 'estado mal' }, 'Anulada') : null),
-          h('div', { style: n.anulada ? { textDecoration: 'line-through' } : null }, n.mensaje))),
+          h('div', { style: n.anulada ? { textDecoration: 'line-through' } : null }, textoLegible(n.mensaje)))),
       anular && !n.anulada ? h('button', { class: 'btn chico peligro', onclick: () => anular(n) }, 'Anular') : null)));
 }
 

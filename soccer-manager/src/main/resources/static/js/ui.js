@@ -361,8 +361,61 @@ export function selector(opciones, alCambiar, { todos = 'Todos', valor = '' } = 
   return s;
 }
 
+// Color estable para cada nombre, para que los avatares no se vean todos iguales.
+export function tonoAvatar(texto) {
+  let n = 0;
+  for (const c of String(texto || '')) n = (n * 31 + c.charCodeAt(0)) % 997;
+  return `c${n % 6}`;
+}
+
 export function persona(nombre, detalle) {
-  return h('div', { class: 'persona' }, h('div', { class: 'avatar' }, iniciales(nombre)), h('div', {}, h('b', {}, nombre), detalle ? h('span', {}, detalle) : null));
+  return h('div', { class: 'persona' }, h('div', { class: `avatar ${tonoAvatar(nombre)}` }, iniciales(nombre)), h('div', {}, h('b', {}, nombre), detalle ? h('span', {}, detalle) : null));
+}
+
+// Encabezado grande de las pantallas de inicio, con el dibujo de una cancha.
+export function banner(titulo, descripcion, ...botones) {
+  const fecha = new Date().toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' });
+  const hoy = fecha.charAt(0).toUpperCase() + fecha.slice(1);
+  return h('section', { class: 'banner' },
+    h('div', { class: 'banner-texto' },
+      h('span', { class: 'banner-fecha' }, icono('reloj'), hoy),
+      h('h1', {}, titulo),
+      descripcion ? h('p', {}, descripcion) : null),
+    h('div', { class: 'acciones' }, botones.filter(Boolean)));
+}
+
+// Reemplaza las fechas en formato ISO dentro de un texto por una fecha legible.
+export function textoLegible(texto) {
+  return String(texto || '').replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?/g, (iso) => formato.fechaHora(iso));
+}
+
+// Gráfico de dona: segmentos [{ valor, color, etiqueta }].
+export function dona(segmentos, centro, subtitulo) {
+  const total = segmentos.reduce((s, x) => s + x.valor, 0);
+  const radio = 52, perimetro = 2 * Math.PI * radio;
+  let avance = 0;
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', '0 0 140 140');
+  svg.setAttribute('class', 'dona-svg');
+  const fondo = document.createElementNS(ns, 'circle');
+  Object.entries({ cx: 70, cy: 70, r: radio, fill: 'none', stroke: '#EDF2EF', 'stroke-width': 16 }).forEach(([k, v]) => fondo.setAttribute(k, v));
+  svg.appendChild(fondo);
+  if (total > 0) {
+    segmentos.filter((x) => x.valor > 0).forEach((x) => {
+      const largo = (x.valor / total) * perimetro;
+      const arco = document.createElementNS(ns, 'circle');
+      Object.entries({ cx: 70, cy: 70, r: radio, fill: 'none', stroke: x.color, 'stroke-width': 16,
+        'stroke-dasharray': `${Math.max(largo - 2, 0)} ${perimetro}`, 'stroke-dashoffset': -avance, transform: 'rotate(-90 70 70)' })
+        .forEach(([k, v]) => arco.setAttribute(k, v));
+      svg.appendChild(arco);
+      avance += largo;
+    });
+  }
+  return h('div', { class: 'dona' },
+    h('div', { class: 'dona-grafico' }, svg, h('div', { class: 'dona-centro' }, h('b', {}, centro ?? total), h('span', {}, subtitulo || 'total'))),
+    h('ul', { class: 'dona-leyenda' }, segmentos.map((x) => h('li', {},
+      h('i', { style: { background: x.color } }), h('span', {}, x.etiqueta), h('b', {}, x.valor)))));
 }
 
 export function datos(pares) {

@@ -308,3 +308,91 @@ select[multiple] { min-height: 120px; }
   .notas { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 560px) { .rejilla.k4 { grid-template-columns: 1fr; } }
+
+/* ---------- Mejoras visuales ---------- */
+/* Avatares con colores distintos por persona */
+.avatar.c0, .persona .avatar.c0 { background: #DDF1E4; color: #13683B; }
+.avatar.c1, .persona .avatar.c1 { background: #E1ECF8; color: #1F558F; }
+.avatar.c2, .persona .avatar.c2 { background: #FDF0CC; color: #8A6400; }
+.avatar.c3, .persona .avatar.c3 { background: #F4E4F7; color: #7A3A8C; }
+.avatar.c4, .persona .avatar.c4 { background: #FCE6DC; color: #A2461F; }
+.avatar.c5, .persona .avatar.c5 { background: #DFF3F3; color: #136A6A; }
+
+/* Tarjetas que responden al pasar el mouse */
+.tarjeta { transition: box-shadow .18s, transform .18s, border-color .18s; }
+a.tarjeta:hover, .tarjeta.kpi:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(16, 40, 28, .12); border-color: #C7D6CC; }
+.kpi { position: relative; overflow: hidden; }
+.kpi::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--linea); }
+.kpi:has(.ico.verde)::before { background: var(--verde-ok); }
+.kpi:has(.ico.azul)::before { background: var(--azul); }
+.kpi:has(.ico.amarillo)::before { background: var(--amarilla); }
+.kpi:has(.ico.rojo)::before { background: var(--roja); }
+.tarjeta .cabeza h2 { display: flex; align-items: center; gap: 8px; }
+.tarjeta .cabeza h2::before { content: ""; width: 4px; height: 18px; border-radius: 2px; background: var(--amarilla); }
+
+/* Encabezado de inicio con dibujo de cancha */
+.banner {
+  position: relative; overflow: hidden; border-radius: 16px; color: #fff; padding: 28px 32px; margin-bottom: 18px;
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+  background:
+    radial-gradient(circle at 78% 50%, transparent 58px, rgba(255,255,255,.16) 59px, rgba(255,255,255,.16) 61px, transparent 62px),
+    linear-gradient(90deg, transparent calc(78% - 1px), rgba(255,255,255,.16) calc(78% - 1px), rgba(255,255,255,.16) calc(78% + 1px), transparent calc(78% + 1px)),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.045) 0 60px, transparent 60px 120px),
+    linear-gradient(120deg, var(--cancha-oscura), var(--cancha) 55%, var(--cancha-clara));
+  box-shadow: 0 10px 30px rgba(10, 64, 41, .25);
+}
+.banner::after {
+  content: ""; position: absolute; right: -40px; top: 50%; transform: translateY(-50%);
+  width: 130px; height: 170px; border: 2px solid rgba(255,255,255,.16); border-right: 0; border-radius: 4px 0 0 4px;
+}
+.banner-texto { position: relative; z-index: 1; }
+.banner h1 { font-size: 40px; line-height: 1.05; margin: 8px 0 6px; color: #fff; }
+.banner p { margin: 0; opacity: .88; font-size: 16px; max-width: 560px; }
+.banner-fecha {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 13px; padding: 4px 10px; border-radius: 999px;
+  background: rgba(255,255,255,.14);
+}
+.banner-fecha svg { width: 14px; height: 14px; }
+.banner .acciones { position: relative; z-index: 1; display: flex; gap: 8px; flex-wrap: wrap; }
+.banner .btn { background: rgba(255,255,255,.12); color: #fff; border-color: rgba(255,255,255,.35); }
+.banner .btn:hover { background: rgba(255,255,255,.22); border-color: #fff; }
+.banner .btn.primario { background: var(--amarilla); color: var(--cancha-oscura); border-color: var(--amarilla); }
+.banner .btn.primario:hover { background: #F6D25C; }
+
+/* Gráfico de dona */
+.dona { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+.dona-grafico { position: relative; width: 140px; height: 140px; flex: none; }
+.dona-svg { width: 140px; height: 140px; }
+.dona-centro { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+.dona-centro b { font-family: "Barlow Condensed", sans-serif; font-size: 30px; line-height: 1; }
+.dona-centro span { font-size: 12px; color: var(--gris); }
+.dona-leyenda { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; flex: 1; min-width: 140px; }
+.dona-leyenda li { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.dona-leyenda i { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+.dona-leyenda span { flex: 1; color: var(--gris); }
+
+/* Inicio de sesión: cancha dibujada y cuentas de prueba */
+.acceso .portada::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent calc(100% - 2px), rgba(255,255,255,.10) 0),
+    radial-gradient(circle at 100% 50%, transparent 118px, rgba(255,255,255,.10) 119px, rgba(255,255,255,.10) 121px, transparent 122px);
+}
+.acceso .portada > * { position: relative; z-index: 1; }
+.cuentas-prueba { margin-top: 26px; padding-top: 20px; border-top: 1px dashed var(--linea); }
+.cuentas-prueba p { margin: 0 0 10px; font-size: 13px; color: var(--gris); }
+.cuentas-prueba .botones-rol { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.boton-rol {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; cursor: pointer; text-align: left;
+  border: 1px solid var(--linea); background: var(--blanco); font: inherit; color: var(--tinta); transition: border-color .15s, background .15s, transform .15s;
+}
+.boton-rol:hover { border-color: var(--cancha); background: var(--cesped); transform: translateY(-1px); }
+.boton-rol .avatar { width: 32px; height: 32px; font-size: 13px; flex: none; }
+.boton-rol b { display: block; font-size: 14px; }
+.boton-rol small { color: var(--gris); font-size: 12px; }
+
+@media (max-width: 860px) {
+  .banner { padding: 22px; }
+  .banner h1 { font-size: 30px; }
+  .banner::after { display: none; }
+}

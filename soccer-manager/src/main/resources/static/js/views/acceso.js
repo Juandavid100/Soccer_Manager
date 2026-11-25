@@ -1,5 +1,5 @@
 // Pantalla de inicio de sesión. Si la base no tiene usuarios, permite crear la primera cuenta de gerente.
-import { h, icono, limpiar } from '../ui.js';
+import { h, icono, limpiar, tonoAvatar } from '../ui.js';
 import { api, R } from '../api.js';
 
 export async function mostrarAcceso(raiz, alEntrar) {
@@ -28,7 +28,7 @@ export async function mostrarAcceso(raiz, alEntrar) {
     return;
   }
   if (!usuarios.length) primeraCuenta(caja, alEntrar);
-  else formularioIngreso(caja, alEntrar);
+  else formularioIngreso(caja, alEntrar, usuarios);
 }
 
 function campo(etiqueta, atributos) {
@@ -36,7 +36,15 @@ function campo(etiqueta, atributos) {
   return { input, nodo: h('div', { class: 'campo' }, h('label', { for: atributos.id }, etiqueta), input) };
 }
 
-function formularioIngreso(caja, alEntrar) {
+// Cuentas de prueba que crea la carga de datos de ejemplo; se muestran solo si existen.
+const CUENTAS_PRUEBA = [
+  { correo: 'gerente@demo.com', rol: 'Gerente', detalle: 'Administra la escuela' },
+  { correo: 'entrenador@demo.com', rol: 'Entrenador', detalle: 'Grupos y asistencia' },
+  { correo: 'acudiente@demo.com', rol: 'Acudiente', detalle: 'Hijos y pagos' },
+  { correo: 'estudiante@demo.com', rol: 'Estudiante', detalle: 'Perfil y progreso' },
+];
+
+function formularioIngreso(caja, alEntrar, usuarios = []) {
   const correo = campo('Correo', { id: 'correo', type: 'email', autocomplete: 'username', required: true, placeholder: 'nombre@escuela.com' });
   const clave = campo('Contraseña', { id: 'clave', type: 'password', autocomplete: 'current-password', required: true });
   const error = h('div', { class: 'alerta error oculto', role: 'alert' });
@@ -56,7 +64,19 @@ function formularioIngreso(caja, alEntrar) {
       boton.disabled = false;
     }
   });
-  limpiar(caja, h('h2', {}, 'Iniciar sesión'), h('p', { class: 'mutado', style: { margin: '6px 0 0' } }, 'Ingrese con la cuenta que le entregó la escuela.'), form);
+  const existentes = new Set(usuarios.map((u) => u.correo));
+  const prueba = CUENTAS_PRUEBA.filter((c) => existentes.has(c.correo));
+  const entrarComo = (c) => {
+    correo.input.value = c.correo;
+    clave.input.value = 'demo12345';
+    form.requestSubmit();
+  };
+  limpiar(caja, h('h2', {}, 'Iniciar sesión'), h('p', { class: 'mutado', style: { margin: '6px 0 0' } }, 'Ingrese con la cuenta que le entregó la escuela.'), form,
+    prueba.length ? h('div', { class: 'cuentas-prueba' },
+      h('p', {}, 'Cuentas de prueba (contraseña ', h('b', {}, 'demo12345'), '). Haga clic para entrar:'),
+      h('div', { class: 'botones-rol' }, prueba.map((c) => h('button', { type: 'button', class: 'boton-rol', onclick: () => entrarComo(c) },
+        h('div', { class: `avatar ${tonoAvatar(c.rol)}` }, c.rol[0]),
+        h('div', {}, h('b', {}, c.rol), h('small', {}, c.detalle)))))) : null);
   correo.input.focus();
 }
 

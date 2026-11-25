@@ -1,5 +1,5 @@
 // Panel de la gerencia: estado general de la escuela (HU-06).
-import { h, limpiar, encabezado, tarjeta, formato, estado, icono, barraProgreso, persona, fechaHoraLocal } from '../ui.js';
+import { h, banner, dona, limpiar, encabezado, tarjeta, formato, estado, icono, barraProgreso, persona, fechaHoraLocal } from '../ui.js';
 import { catalogos, nombrePersona } from '../sesion.js';
 
 function kpi(ico, tono, valor, etiqueta, ruta) {
@@ -24,7 +24,7 @@ export async function mostrar(contenedor, ctx) {
   const saludo = new Date().getHours() < 12 ? 'Buenos días' : new Date().getHours() < 19 ? 'Buenas tardes' : 'Buenas noches';
 
   limpiar(contenedor,
-    encabezado(`${saludo}${ctx.usuario.nombre ? ', ' + ctx.usuario.nombre.split(' ')[0] : ''}`, 'Así va la escuela hoy.',
+    banner(`${saludo}${ctx.usuario.nombre ? ', ' + ctx.usuario.nombre.split(' ')[0] : ''}`, 'Así va la escuela hoy.',
       h('a', { href: '#/estudiantes', class: 'btn primario' }, icono('mas'), 'Matricular'),
       h('a', { href: '#/mensualidades', class: 'btn' }, icono('dinero'), 'Mensualidades')),
     vacia ? h('div', { class: 'alerta info', style: { marginBottom: '16px', alignItems: 'center' } }, icono('datos'),
@@ -44,6 +44,14 @@ export async function mostrar(contenedor, ctx) {
           h('a', { href: '#/' + a.ruta, class: 'btn chico' }, 'Ver'))))
           : h('p', { class: 'mutado', style: { margin: 0 } }, 'No hay actividades programadas.')),
         h('a', { href: '#/entrenamientos', class: 'btn chico' }, 'Entrenamientos')),
+      h('div', { style: { display: 'grid', gap: '16px', alignContent: 'start' } },
+      tarjeta('Estado de mensualidades', h('div', { class: 'cuerpo' },
+        dona([
+          { etiqueta: 'Pagadas', valor: cat.mensualidades.filter((m) => m.estado === 'PAGADO').length, color: '#1E8A4C' },
+          { etiqueta: 'Parciales', valor: cat.mensualidades.filter((m) => m.estado === 'PARCIAL').length, color: '#F2C230' },
+          { etiqueta: 'Pendientes', valor: cat.mensualidades.filter((m) => m.estado === 'PENDIENTE').length, color: '#2563A8' },
+          { etiqueta: 'Vencidas', valor: vencidas.length, color: '#C9302C' },
+        ], cat.mensualidades.length, 'en total'))),
       tarjeta('Ocupación de grupos', h('div', { class: 'cuerpo' },
         cat.grupos.length ? h('ul', { class: 'lista-simple' }, cat.grupos.filter((g) => g.estado === 'ACTIVO').map((g) => {
           const n = activos.filter((e) => e.grupoId === g.id).length;
@@ -51,7 +59,7 @@ export async function mostrar(contenedor, ctx) {
           return h('li', { style: { display: 'block' } },
             h('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: '6px' } }, h('a', { href: `#/grupos/${g.id}` }, h('b', {}, g.codigo)), h('span', { class: 'pequeno' }, `${n}/${g.cupoMaximo}`)),
             barraProgreso(p, p >= 100 ? 'roja' : p >= 80 ? 'amarilla' : ''));
-        })) : h('p', { class: 'mutado', style: { margin: 0 } }, 'Sin grupos.')))),
+        })) : h('p', { class: 'mutado', style: { margin: 0 } }, 'Sin grupos.'))))),
     h('div', { class: 'rejilla k2 separar' },
       tarjeta('Pendientes de asignar grupo', h('div', { class: 'cuerpo' },
         pendientes.length ? h('ul', { class: 'lista-simple' }, pendientes.slice(0, 6).map((e) => h('li', {},

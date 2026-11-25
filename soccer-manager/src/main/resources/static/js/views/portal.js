@@ -1,5 +1,5 @@
 // Portal de familias (acudiente) y del estudiante: perfil, actividades, progreso, convocatorias y pagos (HU-11, 13, 15, 17-20).
-import { h, limpiar, encabezado, tarjeta, formato, estado, icono, iniciales, fechaHoraLocal } from '../ui.js';
+import { h, textoLegible, banner, limpiar, encabezado, tarjeta, formato, estado, icono, iniciales, fechaHoraLocal } from '../ui.js';
 import { api, R } from '../api.js';
 import { cargarPersona, nombrePersona, rolPrincipal } from '../sesion.js';
 import { fichaEstudiante } from './ficha-estudiante.js';
@@ -53,7 +53,7 @@ async function inicioAcudiente(contenedor, ctx) {
   const recientes = notificaciones.filter((n) => !n.anulada).sort((a, b) => String(b.fechaEnvio).localeCompare(String(a.fechaEnvio))).slice(0, 4);
 
   limpiar(contenedor,
-    encabezado(`Hola${yo ? ', ' + yo.nombres : ''}`, 'Consulte las actividades, el progreso y los pagos de sus estudiantes.'),
+    banner(`Hola${yo ? ', ' + yo.nombres : ''}`, 'Consulte las actividades, el progreso y los pagos de sus estudiantes.'),
     saldoTotal > 0 ? h('div', { class: 'alerta aviso', style: { marginBottom: '16px' } }, icono('dinero'), h('div', {}, 'Tiene un saldo pendiente de ', h('b', {}, formato.dinero(saldoTotal)), '. Abra la ficha del estudiante para pagar en línea.')) : null,
     h('div', { class: 'rejilla k3' }, estudiantes.length ? estudiantes.map((e) => {
       const g = grupos.find((x) => x.id === e.grupoId);
@@ -71,7 +71,7 @@ async function inicioAcudiente(contenedor, ctx) {
       tarjeta('Próximas actividades', h('div', { class: 'cuerpo' }, listaActividades(actividades))),
       tarjeta('Últimas notificaciones', h('div', { class: 'cuerpo' },
         recientes.length ? h('ul', { class: 'lista-simple' }, recientes.map((n) => h('li', { style: { display: 'block' } },
-          h('div', { class: 'pequeno mutado' }, `${formato.enum(n.tipo)} · ${formato.fechaHora(n.fechaEnvio)}`), h('div', {}, n.mensaje))))
+          h('div', { class: 'pequeno mutado' }, `${formato.enum(n.tipo)} · ${formato.fechaHora(n.fechaEnvio)}`), h('div', {}, textoLegible(n.mensaje)))))
           : h('p', { class: 'mutado', style: { margin: 0 } }, 'Sin notificaciones.')),
         h('a', { href: '#/notificaciones', class: 'btn chico' }, 'Ver todas'))));
 }
@@ -81,7 +81,7 @@ async function ficha(contenedor, ctx, id, modo, volver) {
   const actividades = modo === 'estudiante' ? await proximasActividades([f.estudiante]) : null;
   limpiar(contenedor,
     volver ? h('button', { class: 'btn fantasma chico', style: { marginBottom: '12px' }, onclick: volver }, '← Volver a mis estudiantes') : null,
-    modo === 'estudiante' ? encabezado('Mi perfil', 'Sus datos, actividades, asistencia y progreso.') : null,
+    modo === 'estudiante' ? banner(`Hola, ${f.estudiante.nombres}`, 'Aquí están tus próximas actividades, tu asistencia, tus evaluaciones y tus pagos.') : null,
     modo === 'estudiante' ? h('div', { style: { marginBottom: '16px' } }, tarjeta('Próximas actividades', h('div', { class: 'cuerpo' }, listaActividades(actividades)))) : null,
     tarjeta(null, h('div', { class: 'cuerpo' }, f.cabeza, f.cuerpo)));
 }

@@ -1,5 +1,5 @@
 // Inicio del entrenador: sus grupos, próximas sesiones y permisos (HU-07).
-import { h, limpiar, encabezado, tarjeta, formato, icono, estado, fechaHoraLocal, barraProgreso } from '../ui.js';
+import { h, banner, limpiar, encabezado, tarjeta, formato, icono, estado, fechaHoraLocal, barraProgreso } from '../ui.js';
 import { catalogos, cargarPersona } from '../sesion.js';
 
 export async function mostrar(contenedor, ctx) {
@@ -19,7 +19,7 @@ export async function mostrar(contenedor, ctx) {
   const permiso = (ok, texto) => h('span', { class: `estado ${ok ? 'ok' : 'neutro'}` }, texto);
 
   limpiar(contenedor,
-    encabezado(`Hola${yo ? ', ' + yo.nombres : ''}`, 'Sus grupos, sus próximas sesiones y lo que tiene pendiente.',
+    banner(`Hola${yo ? ', ' + yo.nombres : ''}`, 'Sus grupos, sus próximas sesiones y lo que tiene pendiente.',
       h('div', { style: { display: 'flex', gap: '6px', flexWrap: 'wrap' } }, permiso(yo?.puedeConvocar, 'Puede convocar'), permiso(yo?.puedeModificarActividades, 'Puede modificar actividades'))),
     h('div', { class: 'rejilla k4' },
       kpi('grupo', 'azul', misGrupos.length, 'Grupos a cargo'),
