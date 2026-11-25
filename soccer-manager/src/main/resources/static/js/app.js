@@ -116,7 +116,7 @@ function armarDiseno(usuario) {
     h('div', { class: 'usuario-lateral' },
       h('div', { class: 'avatar' }, iniciales(nombre)),
       h('div', { class: 'datos' }, h('b', {}, nombre), h('span', {}, rol.charAt(0) + rol.slice(1).toLowerCase())),
-      h('button', { title: 'Cerrar sesión', 'aria-label': 'Cerrar sesión', onclick: salir }, icono('salir'))));
+      h('button', { class: 'boton-salir', title: 'Cerrar sesión', onclick: salir }, icono('salir'), 'Salir')));
   miga = h('div', { class: 'miga' });
   contenido = h('main', { class: 'contenido', id: 'contenido' });
   limpiar(raiz, h('div', { class: 'app' }, lateral,
@@ -127,7 +127,8 @@ function armarDiseno(usuario) {
           miga),
         h('div', { style: { display: 'flex', alignItems: 'center', gap: '14px' } },
           h('span', { class: 'mutado pequeno fecha-barra' }, new Date().toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })),
-          selectorTema())),
+          selectorTema(),
+          h('button', { class: 'btn chico cambiar-usuario', onclick: salir, title: 'Cerrar sesión para entrar con otra cuenta' }, icono('salir'), 'Cambiar de usuario'))),
       contenido)));
 }
 

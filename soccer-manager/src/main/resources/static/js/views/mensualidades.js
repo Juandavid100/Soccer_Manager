@@ -4,14 +4,15 @@ import { api, R } from '../api.js';
 import { catalogos, nombrePersona } from '../sesion.js';
 
 export async function mostrar(contenedor) {
-  let filtro = '', filtroEstado = '', filtroPeriodo = '';
+  let filtro = '', filtroEstado = '', filtroPeriodo = '', filtroCategoria = '';
   const kpis = h('div', { class: 'rejilla k4', style: { marginBottom: '16px' } });
   const cuerpo = h('div', {});
   const filtroPeriodos = h('span', {});
+  const filtroCategorias = h('span', {});
   let cat;
 
   async function refrescar() {
-    cat = await catalogos('mensualidades', 'estudiantes');
+    cat = await catalogos('mensualidades', 'estudiantes', 'categorias');
     pintar();
   }
 
@@ -30,8 +31,17 @@ export async function mostrar(contenedor) {
       kpi('reloj', 'azul', todas.filter((m) => m.estado === 'PENDIENTE' || m.estado === 'PARCIAL').length, 'Pendientes o parciales'));
     const periodos = [...new Set(todas.map((m) => m.periodo))].sort().reverse();
     limpiar(filtroPeriodos, selector(periodos.map((p) => ({ valor: p, texto: formato.periodo(p) })), (v) => { filtroPeriodo = v; pintar(); }, { todos: 'Todos los periodos', valor: filtroPeriodo }));
+    limpiar(filtroCategorias, selector([...cat.categorias].sort((a, b) => b.nombre.localeCompare(a.nombre)).map((c) => ({ valor: c.id, texto: `Categoría ${c.nombre}` })), (v) => { filtroCategoria = v; pintar(); }, { todos: 'Todas las categorías', valor: filtroCategoria }));
+    // Cuántas mensualidades vencidas tiene cada estudiante
+    const vencidasPorEstudiante = {};
+    todas.filter((m) => m.estado === 'VENCIDO').forEach((m) => { vencidasPorEstudiante[m.estudianteId] = (vencidasPorEstudiante[m.estudianteId] || 0) + 1; });
+    const mesesVencidos = (m) => {
+      const n = vencidasPorEstudiante[m.estudianteId] || 0;
+      return n ? h('span', { class: 'estado mal' }, `${n} ${n === 1 ? 'mes vencido' : 'meses vencidos'}`) : h('span', { class: 'estado ok' }, 'Al día');
+    };
     const lista = todas
-      .filter((m) => !filtro || nombrePersona(cat.estudiantesPorId[m.estudianteId]).toLowerCase().includes(filtro))
+      .filter((m) => { const e = cat.estudiantesPorId[m.estudianteId]; return !filtro || nombrePersona(e).toLowerCase().includes(filtro) || String(e?.documento || '').includes(filtro); })
+      .filter((m) => !filtroCategoria || cat.estudiantesPorId[m.estudianteId]?.categoriaId === filtroCategoria)
       .filter((m) => !filtroEstado || m.estado === filtroEstado)
       .filter((m) => !filtroPeriodo || m.periodo === filtroPeriodo)
       .sort((a, b) => b.periodo.localeCompare(a.periodo) || nombrePersona(cat.estudiantesPorId[a.estudianteId]).localeCompare(nombrePersona(cat.estudiantesPorId[b.estudianteId])));
@@ -39,12 +49,13 @@ export async function mostrar(contenedor) {
       filas: lista, vacio: 'No hay mensualidades con estos filtros.',
       alClic: verPagos,
       columnas: [
-        { titulo: 'Estudiante', valor: (m) => persona(nombrePersona(cat.estudiantesPorId[m.estudianteId]), formato.periodo(m.periodo)) },
+        { titulo: 'Estudiante', clase: 'nowrap', valor: (m) => persona(nombrePersona(cat.estudiantesPorId[m.estudianteId]), formato.periodo(m.periodo)) },
         { titulo: 'Vence', clase: 'nowrap', valor: (m) => formato.fecha(m.fechaVencimiento) },
         { titulo: 'Valor', clase: 'derecha', valor: (m) => h('div', {}, formato.dinero(m.valorAPagar), m.porcentajeDescuento ? h('div', { class: 'mutado pequeno' }, `−${m.porcentajeDescuento}% de ${formato.dinero(m.valor)}`) : null) },
         { titulo: 'Pagado', clase: 'derecha', valor: (m) => formato.dinero(m.totalPagado) },
         { titulo: 'Saldo', clase: 'derecha', valor: (m) => h('b', {}, formato.dinero(m.saldo)) },
         { titulo: 'Estado', valor: (m) => estado(m.estado) },
+        { titulo: 'Meses vencidos', clase: 'nowrap', valor: mesesVencidos },
         { titulo: '', clase: 'derecha', valor: (m) => acciones(
           m.saldo > 0 ? h('button', { class: 'btn chico primario', onclick: () => pagar(m) }, 'Registrar pago') : null,
           !m.pagos?.some((p) => !p.anulado) ? botonIcono('borrar', 'Eliminar', () => eliminar(m), 'peligro') : null) },
@@ -141,8 +152,9 @@ export async function mostrar(contenedor) {
     kpis,
     tarjeta(null, h('div', {},
       h('div', { class: 'filtros' },
-        buscador('Buscar estudiante', (t) => { filtro = t; pintar(); }),
+        buscador('Buscar estudiante o documento', (t) => { filtro = t; pintar(); }),
         selector(enumOpciones(['PENDIENTE', 'PARCIAL', 'PAGADO', 'VENCIDO']), (v) => { filtroEstado = v; pintar(); }, { todos: 'Todos los estados' }),
+        filtroCategorias,
         filtroPeriodos),
       cuerpo)));
 }
