@@ -396,3 +396,82 @@ a.tarjeta:hover, .tarjeta.kpi:hover { transform: translateY(-2px); box-shadow: 0
   .banner h1 { font-size: 30px; }
   .banner::after { display: none; }
 }
+
+/* ---------- Temas de color (skins) ---------- */
+html[data-tema="azul"] {
+  --cancha: #16365F; --cancha-oscura: #0D2240; --cancha-clara: #24518A; --cesped: #E4ECF6;
+  --amarilla: #F2C230; --fondo: #F2F5F9; --linea: #DAE2EC;
+}
+html[data-tema="rojo"] {
+  --cancha: #8E1B22; --cancha-oscura: #5E1015; --cancha-clara: #B02A31; --cesped: #F7E6E6;
+  --amarilla: #F5C518; --fondo: #F8F4F3; --linea: #EADCDB;
+}
+html[data-tema="morado"] {
+  --cancha: #4A2A7A; --cancha-oscura: #2E1752; --cancha-clara: #6A41A6; --cesped: #EEE7F7;
+  --amarilla: #F4B63F; --fondo: #F5F3F8; --linea: #E2DCEB;
+}
+body, .lateral, .banner, .tarjeta, .btn { transition: background-color .25s, border-color .25s, color .25s; }
+
+.selector-tema { display: flex; gap: 6px; align-items: center; }
+.selector-tema button {
+  width: 20px; height: 20px; border-radius: 50%; border: 2px solid #fff; cursor: pointer; padding: 0;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.18); transition: transform .15s;
+}
+.selector-tema button:hover { transform: scale(1.15); }
+.selector-tema button.activo { box-shadow: 0 0 0 2px var(--amarilla), 0 0 0 4px rgba(0,0,0,.25); }
+
+/* ---------- Escudo ---------- */
+.escudo-lateral { width: 40px; height: 46px; flex: none; filter: drop-shadow(0 2px 4px rgba(0,0,0,.25)); }
+.lateral .marca b { font-size: 24px; }
+
+/* ---------- Inicio de sesión: solo marca ---------- */
+.acceso .portada {
+  justify-content: center; align-items: center; text-align: center; padding: 48px 32px;
+  background: radial-gradient(ellipse at 50% 40%, var(--cancha-clara), var(--cancha) 55%, var(--cancha-oscura));
+}
+.acceso .portada::before, .acceso .portada::after { display: none; }
+.acceso .portada .cancha-dibujo {
+  position: absolute; inset: 0; pointer-events: none; opacity: .9;
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.035) 0 64px, transparent 64px 128px),
+    radial-gradient(circle at 50% 50%, transparent 128px, rgba(255,255,255,.14) 129px, rgba(255,255,255,.14) 131px, transparent 132px),
+    radial-gradient(circle at 50% 50%, rgba(255,255,255,.22) 5px, transparent 6px),
+    linear-gradient(180deg, transparent calc(50% - 1px), rgba(255,255,255,.14) calc(50% - 1px), rgba(255,255,255,.14) calc(50% + 1px), transparent calc(50% + 1px));
+}
+.cancha-dibujo::before, .cancha-dibujo::after {
+  content: ""; position: absolute; left: 50%; transform: translateX(-50%);
+  width: 46%; height: 15%; border: 2px solid rgba(255,255,255,.14);
+}
+.cancha-dibujo::before { top: 24px; border-top: 0; }
+.cancha-dibujo::after { bottom: 24px; border-bottom: 0; }
+.portada-centro { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; }
+.escudo-portada {
+  width: 150px; height: 174px; filter: drop-shadow(0 14px 30px rgba(0,0,0,.35));
+  animation: aparecer .7s ease-out both;
+}
+.acceso .portada .nombre-app {
+  font-family: "Barlow Condensed", sans-serif; font-weight: 800; text-transform: uppercase;
+  font-size: clamp(64px, 8.5vw, 124px); line-height: .88; letter-spacing: .01em; margin: 26px 0 0 !important;
+  display: flex; flex-direction: column; text-shadow: 0 6px 24px rgba(0,0,0,.3);
+  animation: aparecer .7s .12s ease-out both;
+}
+.nombre-app .acento { color: var(--amarilla); }
+.lema {
+  margin: 18px 0 0 !important; font-size: 15px !important; letter-spacing: .32em; text-transform: uppercase; opacity: .8 !important;
+  display: flex; align-items: center; gap: 14px; animation: aparecer .7s .24s ease-out both;
+}
+.lema::before, .lema::after { content: ""; width: 36px; height: 2px; background: var(--amarilla); }
+.acceso .portada .portada-pie {
+  position: absolute; left: 0; right: 0; bottom: 22px; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+.portada-pie small { opacity: .6; font-size: 12px; }
+@keyframes aparecer { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+@media (max-width: 860px) {
+  .acceso .portada { min-height: 460px; padding-bottom: 96px; }
+  .lema { letter-spacing: .2em; font-size: 13px !important; white-space: nowrap; }
+  .lema::before, .lema::after { width: 22px; }
+  .escudo-portada { width: 96px; height: 112px; }
+  .acceso .portada .nombre-app { font-size: 64px; }
+  .fecha-barra { display: none; }
+}

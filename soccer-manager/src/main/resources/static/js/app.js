@@ -1,5 +1,5 @@
 // Punto de entrada: arma el diseño general, el menú según el rol y el enrutador por hash (#/ruta).
-import { h, icono, limpiar, iniciales, cargando, aviso } from './ui.js';
+import { h, icono, limpiar, iniciales, cargando, aviso, escudo, selectorTema } from './ui.js';
 import { sesion, rolPrincipal, cargarPersona, nombrePersona } from './sesion.js';
 import { mostrarAcceso } from './views/acceso.js';
 
@@ -111,7 +111,7 @@ function armarDiseno(usuario) {
       : h('a', { href: '#/' + item.ruta, 'data-ruta': item.ruta, onclick: () => lateral.classList.remove('abierto') }, icono(item.icono), item.texto)));
   const nombre = usuario.nombre || usuario.correo;
   lateral = h('aside', { class: 'lateral' },
-    h('div', { class: 'marca' }, h('div', { class: 'logo' }, icono('balon')), h('div', {}, h('b', {}, 'Soccer Manager'), h('small', {}, 'Escuela de fútbol'))),
+    h('div', { class: 'marca' }, escudo('escudo-lateral'), h('div', {}, h('b', {}, 'Soccer Manager'), h('small', {}, 'Escuela de fútbol'))),
     menu,
     h('div', { class: 'usuario-lateral' },
       h('div', { class: 'avatar' }, iniciales(nombre)),
@@ -125,7 +125,9 @@ function armarDiseno(usuario) {
         h('div', { style: { display: 'flex', alignItems: 'center', gap: '10px' } },
           h('button', { class: 'btn fantasma icono boton-menu', 'aria-label': 'Abrir menú', onclick: () => lateral.classList.toggle('abierto') }, icono('menu')),
           miga),
-        h('div', { class: 'mutado pequeno' }, new Date().toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }))),
+        h('div', { style: { display: 'flex', alignItems: 'center', gap: '14px' } },
+          h('span', { class: 'mutado pequeno fecha-barra' }, new Date().toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })),
+          selectorTema())),
       contenido)));
 }
 

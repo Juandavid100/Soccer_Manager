@@ -1,22 +1,17 @@
 // Pantalla de inicio de sesión. Si la base no tiene usuarios, permite crear la primera cuenta de gerente.
-import { h, icono, limpiar, tonoAvatar } from '../ui.js';
+import { h, icono, limpiar, tonoAvatar, escudo, selectorTema } from '../ui.js';
 import { api, R } from '../api.js';
 
 export async function mostrarAcceso(raiz, alEntrar) {
   const caja = h('div', { class: 'caja' }, h('p', { class: 'mutado' }, 'Conectando con el servidor…'));
   limpiar(raiz, h('div', { class: 'acceso' },
     h('section', { class: 'portada' },
-      h('div', { class: 'marca', style: { padding: 0 } },
-        h('div', { class: 'logo' }, icono('balon')),
-        h('div', {}, h('b', {}, 'Soccer Manager'), h('small', {}, 'Escuela de fútbol'))),
-      h('div', {},
-        h('h1', {}, 'Toda la escuela, en una sola cancha.'),
-        h('p', {}, 'Matrículas, grupos, entrenamientos, partidos, evaluaciones y mensualidades organizados para gerentes, entrenadores y familias.'),
-        h('div', { class: 'puntos' },
-          h('div', {}, icono('check'), 'Matrícula con acudientes y control de cupos por grupo'),
-          h('div', {}, icono('check'), 'Asistencia, convocatorias y evaluaciones del progreso'),
-          h('div', {}, icono('check'), 'Mensualidades con descuentos, abonos y saldo al día'))),
-      h('small', { style: { opacity: .7, position: 'relative', zIndex: 1 } }, 'Diseño de Software · Universidad Cooperativa de Colombia, Pasto')),
+      h('div', { class: 'cancha-dibujo', 'aria-hidden': 'true' }),
+      h('div', { class: 'portada-centro' },
+        escudo('escudo-portada'),
+        h('h1', { class: 'nombre-app' }, h('span', {}, 'Soccer'), h('span', { class: 'acento' }, 'Manager')),
+        h('p', { class: 'lema' }, 'Escuela de fútbol')),
+      h('div', { class: 'portada-pie' }, selectorTema(), h('small', {}, 'Diseño de Software · UCC Pasto'))),
     h('section', { class: 'formulario-acceso' }, caja)));
 
   let usuarios = [];

@@ -71,6 +71,45 @@ export function icono(nombre, clase) {
   return span.firstChild;
 }
 
+// Escudo de Soccer Manager: un escudo con un balón. Toma los colores del tema activo.
+export function escudo(clase = 'escudo') {
+  const span = document.createElement('span');
+  span.innerHTML = `<svg class="${clase}" viewBox="0 0 100 116" aria-hidden="true">
+    <path d="M50 3 92 17v38c0 29-18 49-42 58C26 104 8 84 8 55V17z" fill="var(--amarilla)"/>
+    <path d="M50 11 84 22.5V55c0 24-14.5 40.5-34 48.5C30.5 95.5 16 79 16 55V22.5z" fill="var(--cancha-oscura)"/>
+    <circle cx="50" cy="58" r="25" fill="#fff"/>
+    <path d="m50 46 10 7.3-3.8 11.7H43.8L40 53.3z" fill="var(--cancha-oscura)"/>
+    <path d="M50 33v13M60 53.3l12.5-4M56.2 65l7.6 10.8M43.8 65l-7.6 10.8M40 53.3l-12.5-4" stroke="var(--cancha-oscura)" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    <path d="m50 18 2.6 5.3 5.8.8-4.2 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z" fill="var(--amarilla)"/>
+  </svg>`;
+  return span.firstChild;
+}
+
+// Temas de color ("skins"). Se guardan en el navegador.
+export const TEMAS = [
+  { id: 'verde', nombre: 'Verde cancha', color: '#0F5D3A' },
+  { id: 'azul', nombre: 'Azul noche', color: '#16365F' },
+  { id: 'rojo', nombre: 'Rojo Pasto', color: '#8E1B22' },
+  { id: 'morado', nombre: 'Morado', color: '#4A2A7A' },
+];
+
+export function aplicarTema(id) {
+  document.documentElement.dataset.tema = id;
+  try { localStorage.setItem('soccermanager.tema', id); } catch { /* sin almacenamiento */ }
+}
+
+export function selectorTema() {
+  const actual = () => document.documentElement.dataset.tema || 'verde';
+  const caja = h('div', { class: 'selector-tema', role: 'group', 'aria-label': 'Color de la plataforma' });
+  const pintar = () => limpiar(caja, TEMAS.map((t) => h('button', {
+    type: 'button', title: t.nombre, 'aria-label': `Tema ${t.nombre}`,
+    class: t.id === actual() ? 'activo' : '', style: { background: t.color },
+    onclick: () => { aplicarTema(t.id); pintar(); },
+  })));
+  pintar();
+  return caja;
+}
+
 // ---------- Formatos ----------
 const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 const MESES_LARGOS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
@@ -386,7 +425,9 @@ export function banner(titulo, descripcion, ...botones) {
 
 // Reemplaza las fechas en formato ISO dentro de un texto por una fecha legible.
 export function textoLegible(texto) {
-  return String(texto || '').replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?/g, (iso) => formato.fechaHora(iso));
+  return String(texto || '')
+    .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?/g, (iso) => formato.fechaHora(iso))
+    .replace(/(pago de |[Ss]aldo: )(\d+(\.\d+)?)/g, (_, antes, valor) => antes + formato.dinero(Number(valor)));
 }
 
 // Gráfico de dona: segmentos [{ valor, color, etiqueta }].
