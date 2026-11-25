@@ -12,7 +12,7 @@ Proyecto final de Diseño de Software, Universidad Cooperativa de Colombia, sede
 |---|---|
 | Plataforma web | https://soccer-manager-gfqo.onrender.com |
 | API REST (ejemplo) | https://soccer-manager-gfqo.onrender.com/api/categorias |
-| Prototipos de las 20 historias | https://juandavid100.github.io/Soccer_Manager/prototipos/ |
+| Prototipos de las 20 historias | https://github.com/Juandavid100/Soccer_Manager/tree/main/prototipos |
 
 Está desplegado en **Render**, con la base de datos en **MongoDB Atlas**. Como el plan es gratuito, el servidor se apaga cuando nadie lo usa, así que la primera visita puede tardar cerca de un minuto en cargar.
 
