@@ -1,3 +1,5 @@
+<p align="center"><img src="soccer-manager/src/main/resources/static/img/emblema.png" width="360" alt="Soccer Manager"></p>
+
 # Soccer Manager
 
 Sistema para administrar una escuela de fútbol: estudiantes, acudientes, entrenadores, grupos, categorías, entrenamientos, asistencia, campeonatos, evaluaciones, mensualidades y notificaciones.

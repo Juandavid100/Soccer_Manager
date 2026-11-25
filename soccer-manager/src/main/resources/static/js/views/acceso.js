@@ -8,9 +8,9 @@ export async function mostrarAcceso(raiz, alEntrar) {
     h('section', { class: 'portada' },
       h('div', { class: 'cancha-dibujo', 'aria-hidden': 'true' }),
       h('div', { class: 'portada-centro' },
-        escudo('escudo-portada'),
+        escudo('emblema-portada'),
         h('h1', { class: 'nombre-app' }, h('span', {}, 'Soccer'), h('span', { class: 'acento' }, 'Manager')),
-        h('p', { class: 'lema' }, 'Escuela de fútbol')),
+        h('p', { class: 'lema' }, 'Gestiona ', h('b', {}, '•'), ' Entrena ', h('b', {}, '•'), ' Potencia talento')),
       h('div', { class: 'portada-pie' }, selectorTema(), h('small', {}, 'Diseño de Software · UCC Pasto'))),
     h('section', { class: 'formulario-acceso' }, caja)));
 

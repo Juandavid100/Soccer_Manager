@@ -47,7 +47,7 @@ export async function mostrar(contenedor, ctx) {
       h('div', { style: { display: 'grid', gap: '16px', alignContent: 'start' } },
       tarjeta('Estado de mensualidades', h('div', { class: 'cuerpo' },
         dona([
-          { etiqueta: 'Pagadas', valor: cat.mensualidades.filter((m) => m.estado === 'PAGADO').length, color: '#1E8A4C' },
+          { etiqueta: 'Pagadas', valor: cat.mensualidades.filter((m) => m.estado === 'PAGADO').length, color: '#86C80F' },
           { etiqueta: 'Parciales', valor: cat.mensualidades.filter((m) => m.estado === 'PARCIAL').length, color: '#F2C230' },
           { etiqueta: 'Pendientes', valor: cat.mensualidades.filter((m) => m.estado === 'PENDIENTE').length, color: '#2563A8' },
           { etiqueta: 'Vencidas', valor: vencidas.length, color: '#C9302C' },

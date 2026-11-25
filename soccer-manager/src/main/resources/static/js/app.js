@@ -111,7 +111,7 @@ function armarDiseno(usuario) {
       : h('a', { href: '#/' + item.ruta, 'data-ruta': item.ruta, onclick: () => lateral.classList.remove('abierto') }, icono(item.icono), item.texto)));
   const nombre = usuario.nombre || usuario.correo;
   lateral = h('aside', { class: 'lateral' },
-    h('div', { class: 'marca' }, escudo('escudo-lateral'), h('div', {}, h('b', {}, 'Soccer Manager'), h('small', {}, 'Escuela de fútbol'))),
+    h('div', { class: 'marca-logo' }, escudo('emblema-lateral'), h('b', {}, 'Soccer ', h('span', {}, 'Manager'))),
     menu,
     h('div', { class: 'usuario-lateral' },
       h('div', { class: 'avatar' }, iniciales(nombre)),
